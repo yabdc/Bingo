@@ -10,7 +10,7 @@
 
 @implementation SRandom
 {
-    int g_iArray[35];
+    int g_iArray[100];
 }
 -(id)initWithRange:(int)iRange{
     [self resetRandom:iRange];

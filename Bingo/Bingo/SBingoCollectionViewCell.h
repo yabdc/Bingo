@@ -11,5 +11,5 @@
 @interface SBingoCollectionViewCell : UICollectionViewCell
 
 @property (weak, nonatomic) IBOutlet UITextField *m_numberField;
-
+@property (assign) int m_iFlag;
 @end
