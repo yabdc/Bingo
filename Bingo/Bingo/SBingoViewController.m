@@ -25,42 +25,51 @@
     BOOL g_bMode;
     NSMutableArray *g_aryShow;
 }
+
 static NSString * const s_reuseIdentifier = @"Cell";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    //數據初始化
     _m_iMaxRange=30;
     _m_iLength=3;
     g_bMode=NO;
     g_aryShow=[NSMutableArray new];
     g_Random=[[SRandom alloc] initWithRange:_m_iMaxRange];
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
-        [g_aryShow addObject:g_Random.m_aryRandom];
+        [g_aryShow insertObject:g_Random.m_aryRandom[i] atIndex:i];
     }
-    
 }
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-#pragma mark -- btnAction
+
+#pragma mark -- BtnAction
 - (IBAction)randomNumber:(id)sender {
     g_Random=[[SRandom alloc] initWithRange:_m_iMaxRange];
+    for (int i=0; i<_m_iLength*_m_iLength; i++) {
+        [g_aryShow removeObjectAtIndex:i];
+        [g_aryShow insertObject:g_Random.m_aryRandom[i] atIndex:i];
+    }
     [self.m_custCollectionView reloadData];
 }
+
 - (IBAction)enterNumber:(id)sender {
-    [g_Random.m_aryRandom removeAllObjects];
+    for (int i=0; i<g_aryShow.count; i++) {
+        g_aryShow[i]=@"";
+    }
     [self.m_custCollectionView reloadData];
 }
+
 - (IBAction)changeMode:(id)sender {
     //bMode=YES,this is game mode.   bMode=NO,this is edit mode.
     g_bMode=[_m_modeSwitch isOn];
     if (g_bMode) {
         _m_customButton.enabled=NO;
         _m_randomButton.enabled=NO;
-        
         [self.m_custCollectionView reloadData];
     }else{
         _m_customButton.enabled=YES;
@@ -69,6 +78,38 @@ static NSString * const s_reuseIdentifier = @"Cell";
     }
 }
 
+#pragma mark --Method
+
+-(BOOL)checkNumber:(int)iNumber{
+    if (iNumber>=1 && iNumber<=_m_iMaxRange) {
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+-(void)showAlertView{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Waining"
+                                                    message:@"please enter the number between 1 to 30."
+                                                   delegate:self
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles: nil];
+    [alert show];  // 把alert這個物件秀出來
+}
+
+- (void)addDoneButton:(UITextField *)TextField{
+
+    UIToolbar* keyboardToolbar = [[UIToolbar alloc] init];
+    [keyboardToolbar sizeToFit];
+    UIBarButtonItem *flexBarButton = [[UIBarButtonItem alloc]
+                                      initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                      target:nil action:nil];
+    UIBarButtonItem *doneBarButton = [[UIBarButtonItem alloc]
+                                      initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                      target:self.view action:@selector(endEditing:)];
+    keyboardToolbar.items = @[flexBarButton, doneBarButton];
+    TextField.inputAccessoryView = keyboardToolbar;
+}
 #pragma mark <UICollectionViewDataSource>
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -82,21 +123,21 @@ static NSString * const s_reuseIdentifier = @"Cell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     SBingoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:s_reuseIdentifier forIndexPath:indexPath];
-    
-    if (g_Random.m_aryRandom.count==0) {
+    [self addDoneButton:cell.m_numberField];
+    if (g_aryShow.count==0) {
         cell.m_numberField.text=@"";
     }else{
-        cell.m_numberField.text =g_Random.m_aryRandom[indexPath.row];
+        cell.m_numberField.text =g_aryShow[indexPath.row];
     }
      if (g_bMode) {
         cell.m_numberField.enabled=NO;
     }else{
-        cell.m_numberField.enabled=YES;
-        cell.m_numberField.backgroundColor=[UIColor whiteColor];
+            cell.m_numberField.enabled=YES;
+            cell.m_numberField.backgroundColor=[UIColor whiteColor];
     }
     cell.m_numberField.delegate=self;
     // Configure the cell
-    
+    cell.m_numberField.keyboardType = UIKeyboardTypeNumberPad;
     return cell;
 }
 
@@ -115,46 +156,29 @@ static NSString * const s_reuseIdentifier = @"Cell";
 }
 
 #pragma mark <UITextFieldDelegate>
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    //UITextFiled透過text屬性取得使用者輸入的資料,
-    //而後設定於UILabel上顯示。
-//    [self.label setText:textField.text];
-    
-    //textField透過resignFirstResponder方法
-    //釋放第⼀一主控權,如此使用者輸入的鍵盤就會消失
     [textField resignFirstResponder];
     return YES;
 }
-
-
-/*
- // Uncomment this method to specify if the specified item should be highlighted during tracking
- - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
-	return YES;
- }
- */
-
-
-//  Uncomment this method to specify if the specified item should be selected
-// - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-// return YES;
-// }
-
-
-/*
- // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
- - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
-	return NO;
- }
- 
- - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	return NO;
- }
- 
- - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	
- }
- */
-
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+    SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)textField.superview.superview;
+    NSIndexPath *indexPath = [self.m_custCollectionView indexPathForCell:cell];
+    if ([self checkNumber:[cell.m_numberField.text intValue]]) {
+        if (!([g_aryShow[indexPath.row]isKindOfClass:[NSNull class]])) {
+            [g_aryShow removeObjectAtIndex:indexPath.row];
+            [g_aryShow insertObject:cell.m_numberField.text atIndex:indexPath.row];
+        }else{
+            [g_aryShow insertObject:cell.m_numberField.text atIndex:indexPath.row];
+        }
+        [self.m_custCollectionView reloadData];
+        [textField resignFirstResponder];
+    }else{
+        [self.m_custCollectionView reloadData];
+        [textField resignFirstResponder];
+        [self showAlertView];
+    }
+    
+}
 
 @end
