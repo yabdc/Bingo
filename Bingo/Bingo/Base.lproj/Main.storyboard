@@ -110,20 +110,30 @@
                                             <action selector="randomNumber:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="bzy-Jf-pqM"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="數字範圍1~30" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AR6-Ms-DxO">
+                                        <rect key="frame" x="0.0" y="21" width="288" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" red="0.60784313729999995" green="0.6705882353" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstItem="AR6-Ms-DxO" firstAttribute="leading" secondItem="kaw-OR-o5K" secondAttribute="leading" id="AVF-Hn-eiM"/>
+                                    <constraint firstAttribute="trailing" secondItem="AR6-Ms-DxO" secondAttribute="trailing" id="aLn-H0-xKB"/>
+                                    <constraint firstItem="AR6-Ms-DxO" firstAttribute="top" secondItem="kaw-OR-o5K" secondAttribute="top" constant="21" id="nks-7G-DF8"/>
+                                </constraints>
                             </view>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Clo-ci-akJ">
                                 <rect key="frame" x="0.0" y="28" width="320" height="388"/>
-                                <color key="backgroundColor" white="0.81000000000000005" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="388" id="V9N-Sz-gyA"/>
                                 </constraints>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="0.0" id="qf1-Hb-ZZs">
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="qf1-Hb-ZZs">
                                     <size key="itemSize" width="90" height="90"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="10" minY="10" maxX="10" maxY="10"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="IQF-V9-9kk" customClass="SBingoCollectionViewCell">
@@ -134,20 +144,19 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="CyW-Ms-UTs">
-                                                    <rect key="frame" x="0.0" y="0.0" width="90" height="90"/>
+                                                    <rect key="frame" x="2" y="2" width="86" height="86"/>
                                                     <color key="textColor" red="0.1215686275" green="0.12941176469999999" blue="0.14117647059999999" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="50"/>
+                                                    <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="40"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                                                 </textField>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
-                                        <color key="backgroundColor" red="1" green="1" blue="0.40000000596046448" alpha="1" colorSpace="calibratedRGB"/>
                                         <constraints>
-                                            <constraint firstAttribute="trailing" secondItem="CyW-Ms-UTs" secondAttribute="trailing" id="H0U-BO-OAI"/>
-                                            <constraint firstItem="CyW-Ms-UTs" firstAttribute="top" secondItem="IQF-V9-9kk" secondAttribute="top" id="WB3-36-Ybl"/>
-                                            <constraint firstAttribute="bottom" secondItem="CyW-Ms-UTs" secondAttribute="bottom" id="hFX-fH-F5C"/>
-                                            <constraint firstItem="CyW-Ms-UTs" firstAttribute="leading" secondItem="IQF-V9-9kk" secondAttribute="leading" id="puF-tL-pR4"/>
+                                            <constraint firstItem="CyW-Ms-UTs" firstAttribute="leading" secondItem="IQF-V9-9kk" secondAttribute="leading" constant="2" id="WKT-bI-lQg"/>
+                                            <constraint firstAttribute="bottom" secondItem="CyW-Ms-UTs" secondAttribute="bottom" constant="2" id="ZHS-KQ-Jaa"/>
+                                            <constraint firstAttribute="trailing" secondItem="CyW-Ms-UTs" secondAttribute="trailing" constant="2" id="lC1-u8-13g"/>
+                                            <constraint firstItem="CyW-Ms-UTs" firstAttribute="top" secondItem="IQF-V9-9kk" secondAttribute="top" constant="2" id="tzX-Ya-7XM"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="m_numberField" destination="CyW-Ms-UTs" id="gXu-eU-NyZ"/>
