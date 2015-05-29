@@ -1,0 +1,15 @@
+/* 
+  Localizable.strings
+  Bingo
+
+  Created by 1500244 on 2015/5/28.
+  Copyright (c) 2015年 andychan. All rights reserved.
+*/
+    "Waining"="警告!";
+    "SameNumber"="不能輸入相同的數字。";
+    "OK"="確認";
+    "OverRange"="請輸入一個1~30的數字";
+    "Congratulation"="恭喜!你贏得這場比賽。";
+    "Bingo"="賓果！";
+    "AllNumber"="請在每格都填入數字。";
+   

@@ -29,13 +29,14 @@
 }
 
 -(void)resetRandom:(int)iRange{
+    int iswap;
     for (int i=1; i<=iRange; i++) {
         g_iArray[i-1]=i;
     }
     int ino=iRange-1;
     int itemp=0;
     while (ino>=0) {
-        int iswap=arc4random()%(iRange-1);
+        iswap=arc4random()%(iRange-1);
         itemp=g_iArray[ino];
         g_iArray[ino]=g_iArray[iswap];
         g_iArray[iswap]=itemp;

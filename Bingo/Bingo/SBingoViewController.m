@@ -8,6 +8,7 @@
 
 #define BingoCount 3            //賓果要達成的線條數
 #define iphone4sHeight 480.0f
+#define toolbarheight 44.0f
 
 #import "SBingoViewController.h"
 #import "SBingoCollectionViewCell.h"
@@ -34,21 +35,20 @@
     NSMutableArray *g_aryShow;  //數字陣列
     NSMutableArray *g_aryBingo; //賓果陣列
     NSMutableArray *g_aryCell;  //CollectionViewCell陣列
-    BOOL g_bMode;   //模式
-    BOOL g_bBingo;  //賓果
-    CGSize kbSize;  //鍵盤size
-    CGRect oldframe;//暫存CollectionView移動前的位置
-    
+    BOOL g_bMode;       //模式
+    BOOL g_bBingo;      //賓果
+    CGSize kbSize;      //鍵盤size
+    CGRect oldframe;    //暫存CollectionView移動前的位置
 }
 
 static NSString * const s_reuseIdentifier = @"Cell";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    //數據初始化
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardDidShowNotification object:nil];
-    
+    //註冊鍵盤監聽
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    //數據初始化
     _m_iMaxRange=30;
     _m_iLength=3;
     _m_iTextFeildValue=0;
@@ -60,16 +60,15 @@ static NSString * const s_reuseIdentifier = @"Cell";
     g_aryBingo=[NSMutableArray new];
     g_aryCell=[NSMutableArray new];
     kbSize=CGSizeZero;
+    oldframe=CGRectZero;
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
         g_aryBingo[i]=@"0";
         g_aryCell[i]=@"0";
     }
-    
     g_Random=[[SRandom alloc] initWithRange:_m_iMaxRange];
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
         [g_aryShow insertObject:g_Random.m_aryRandom[i] atIndex:i];
     }
-  
 }
 
 -(void)viewDidAppear:(BOOL)animated{
@@ -78,7 +77,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
     CGRect newframe=_m_custCollectionView.frame;
     newframe.size.height=[[UIScreen mainScreen] bounds].size.width;
     [_m_custCollectionView setFrame:newframe];
-    
+    oldframe=_m_custCollectionView.frame;
     //設定View
     if (iphone4sHeight==[[UIScreen mainScreen] bounds].size.height) {
         CGRect newframe=_m_custCollectionView.frame;
@@ -115,15 +114,27 @@ static NSString * const s_reuseIdentifier = @"Cell";
 }
 
 - (IBAction)changeMode:(id)sender {
+    for (int i=0; i<_m_iLength*_m_iLength; i++) {
+        if (YES==![g_aryShow[i] isEqualToString:@""]) {
+            //不相同就什麼都不做
+        }else{
+            [self showAlertView:NSLocalizedString(@"Waining", nil) message:NSLocalizedString(@"AllNumber", nil)];
+            [_m_modeSwitch setOn:NO];
+            break;
+        }
+    }
     //bMode=YES,this is game mode.   bMode=NO,this is edit mode.
     g_bMode=[_m_modeSwitch isOn];
-    if (g_bMode) {
+    
+    if (YES==g_bMode) {
+        for (int i=0; i<_m_iLength*_m_iLength; i++) {
+            g_aryBingo[i]=@"0";
+        }
         _m_customButton.enabled=NO;
         _m_randomButton.enabled=NO;
         [self.m_custCollectionView reloadData];
     }else{
         g_bBingo=NO;
-        _m_iBingoCount=0;
         _m_customButton.enabled=YES;
         _m_randomButton.enabled=YES;
         [self.m_custCollectionView reloadData];
@@ -146,44 +157,34 @@ static NSString * const s_reuseIdentifier = @"Cell";
         if (_m_iCellNumber==i) {
             
         }else{
-            if (![strNumber isEqualToString:g_aryShow[i]]) {
+            if (YES==![strNumber isEqualToString:g_aryShow[i]]) {
                 //不相同就什麼都不做
             }else{
-            [self showAlertView2];
+            [self showAlertView:NSLocalizedString(@"Waining", nil) message:NSLocalizedString(@"SameNumber", nil)];
             return NO;
             }
         }
     }
-    if ([self checkNumber:iNumber]) {
+    if (YES==[self checkNumber:iNumber]) {
         return YES;
     }else{
-        [self showAlertView];
+        [self showAlertView:NSLocalizedString(@"Waining", nil) message:NSLocalizedString(@"OverRange", nil)];
     }
     return NO;
 }
 
-
--(void)showAlertView{
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Waining"
-                                                    message:@"please enter the number between 1 to 30."
+-(void)showAlertView:(NSString *)strTitle message:(NSString *)strMessage{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle
+                                                    message:strMessage
                                                    delegate:self
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles: nil];
-    [alert show];
-}
-
--(void)showAlertView2{
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Waining"
-                                                    message:@"Can't enter the same number"
-                                                   delegate:self
-                                          cancelButtonTitle:@"OK"
+                                          cancelButtonTitle:NSLocalizedString(@"OK", nil)
                                           otherButtonTitles: nil];
     [alert show];
 }
 
 - (void)addDoneButton:(UITextField *)TextField{
-
     UIToolbar* keyboardToolbar = [[UIToolbar alloc] init];
+    
     [keyboardToolbar sizeToFit];
     UIBarButtonItem *cancelBarButton = [[UIBarButtonItem alloc]
                                       initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
@@ -200,7 +201,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
 
 -(void)endEditTextField{
     SBingoCollectionViewCell *testCell=g_aryCell[_m_iCellNumber];
-    if ([self checkSameNumber:[testCell.m_numberField.text intValue]]) {
+    if (YES==[self checkSameNumber:[testCell.m_numberField.text intValue]]) {
         if (!([g_aryShow[_m_iCellNumber]isKindOfClass:[NSNull class]])) {
             [g_aryShow removeObjectAtIndex:_m_iCellNumber];
             [g_aryShow insertObject:testCell.m_numberField.text atIndex:_m_iCellNumber];
@@ -212,7 +213,88 @@ static NSString * const s_reuseIdentifier = @"Cell";
         [self.view endEditing:YES];
     }
 }
+#pragma mark -- BingoMethods
 
+-(void)checkBingo:(NSMutableArray *)aryTestBingo
+{
+    _m_iBingoCount=0;
+    //檢查橫列
+    [self checkBingoRow:aryTestBingo];
+    //檢查直行
+    [self checkBingoStraight:aryTestBingo];
+    //檢查反斜線
+    [self checkBingoBackSlash:aryTestBingo];
+    //檢查斜線
+    [self checkBingoSlash:aryTestBingo];
+    if (_m_iBingoCount>=BingoCount) {
+        g_bBingo=YES;
+        [self showAlertView:NSLocalizedString(@"Bingo", nil) message:NSLocalizedString(@"Congratulation", nil)];
+    }
+    NSLog(@"%d",_m_iBingoCount);
+}
+
+-(void)checkBingoRow:(NSMutableArray *)aryTestBingo{
+    int iRowCount=0;
+    NSString *str=nil;
+    for (int i=0; i<_m_iLength; i++) {
+        iRowCount=0;
+        for (int j=0;j<_m_iLength; j++) {
+            str=aryTestBingo[i*_m_iLength+j];
+            iRowCount += [str intValue];
+            if (_m_iLength==iRowCount) {
+                _m_iBingoCount++;
+            }
+        }
+    }
+}
+
+-(void)checkBingoStraight:(NSMutableArray *)aryTestBingo{
+    int iStraightCount=0;
+    NSString *str=nil;
+    for (int i=0; i<_m_iLength; i++) {
+        iStraightCount=0;
+        for (int j=0;j<_m_iLength; j++) {
+            str=aryTestBingo[i+j*_m_iLength];
+            iStraightCount += [str intValue];
+            if (_m_iLength==iStraightCount) {
+                _m_iBingoCount++;
+            }
+        }
+    }
+}
+
+-(void)checkBingoBackSlash:(NSMutableArray *)aryTestBingo{
+    int iBackSlash=0;
+    NSString *str=nil;
+    for (int i=0; i<_m_iLength; i++) {
+        for (int j=0;j<_m_iLength; j++) {
+            if (i==j) {
+                str=aryTestBingo[(i*_m_iLength+i)];
+                iBackSlash += [str intValue];
+                if (_m_iLength==iBackSlash) {
+                    _m_iBingoCount++;
+                }
+                
+            }
+        }
+    }
+}
+
+-(void)checkBingoSlash:(NSMutableArray *)aryTestBingo{
+    int iSlash=0;
+    NSString *str=nil;
+    for (int i=0; i<_m_iLength; i++) {
+        for (int j=0;j<_m_iLength; j++) {
+            if ((i+1)*(_m_iLength-1)==i*_m_iLength+j) {
+                str=aryTestBingo[(i*_m_iLength+j)];
+                iSlash += [str intValue];
+                if (_m_iLength==iSlash) {
+                    _m_iBingoCount++;
+                }
+            }
+        }
+    }
+}
 
 #pragma mark <UICollectionViewDataSource>
 
@@ -231,17 +313,18 @@ static NSString * const s_reuseIdentifier = @"Cell";
     //加結束鍵
     [self addDoneButton:cell.m_numberField];
     //判斷是否沒資料
-    if (g_aryShow.count==0) {
+    if (0==g_aryShow.count) {
         cell.m_numberField.text=@"";
     }else{
         cell.m_numberField.text =g_aryShow[indexPath.row];
     }
     //是否為遊戲模式
-     if (g_bMode) {
+     if (YES==g_bMode) {
         cell.m_numberField.enabled=NO;
     }else{
-            cell.m_numberField.enabled=YES;
-            cell.m_numberField.backgroundColor=[UIColor whiteColor];
+        cell.m_numberField.enabled=YES;
+        cell.m_numberField.backgroundColor=[UIColor whiteColor];
+        cell.m_iFlag=0;
     }
     
     cell.m_numberField.delegate=self;
@@ -255,86 +338,25 @@ static NSString * const s_reuseIdentifier = @"Cell";
 #pragma mark <UICollectionViewDelegate>
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (g_bMode) {
-        [g_aryBingo removeObjectAtIndex:indexPath.row];
-        SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-        //flag=1,selected.   flag=0,false
-        if (1==cell.m_iFlag) {
-            [g_aryBingo insertObject:@"0" atIndex:indexPath.row];
-            cell.m_iFlag=0;
-            cell.m_numberField.backgroundColor = [UIColor whiteColor];
-        }else{
-            [g_aryBingo insertObject:@"1" atIndex:indexPath.row];
-            cell.m_iFlag=1;
-            cell.m_numberField.backgroundColor = [UIColor colorWithRed:0.333 green:0.996 blue:0.408 alpha:1.000];
-        }
-        NSLog(@"%@",g_aryBingo);
-        [self checkBingo:g_aryBingo];
-    }
-    
-}
-
--(void)checkBingo:(NSMutableArray *)aryTestBingo
-{
-    _m_iBingoCount=0;
-    int iRowCount;
-    int iSlash=0;
-    int iBackSlash=0;
-    //檢查橫列
-    for (int i=0; i<_m_iLength; i++) {
-            iRowCount=0;
-        for (int j=0;j<_m_iLength; j++) {
-            NSString *str=aryTestBingo[i*_m_iLength+j];
-            iRowCount += [str intValue];
-            if (_m_iLength==iRowCount) {
-                _m_iBingoCount++;
+    if (YES==g_bBingo) {
+        
+    }else{
+        if (YES==g_bMode) {
+            [g_aryBingo removeObjectAtIndex:indexPath.row];
+            SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+            //flag=1,selected.   flag=0,false
+            if (1==cell.m_iFlag) {
+                [g_aryBingo insertObject:@"0" atIndex:indexPath.row];
+                cell.m_iFlag=0;
+                cell.m_numberField.backgroundColor = [UIColor whiteColor];
+            }else{
+                [g_aryBingo insertObject:@"1" atIndex:indexPath.row];
+                cell.m_iFlag=1;
+                cell.m_numberField.backgroundColor = [UIColor colorWithRed:0.333 green:0.996 blue:0.408 alpha:1.000];
             }
+            [self checkBingo:g_aryBingo];
         }
     }
-    //檢查直行
-    for (int i=0; i<_m_iLength; i++) {
-        iRowCount=0;
-        for (int j=0;j<_m_iLength; j++) {
-            NSString *str=aryTestBingo[i+j*_m_iLength];
-            iRowCount += [str intValue];
-            if (_m_iLength==iRowCount) {
-                _m_iBingoCount++;
-            }
-        }
-    }
-    //檢查反斜線
-    for (int i=0; i<_m_iLength; i++) {
-        for (int j=0;j<_m_iLength; j++) {
-            if (i==j) {
-                NSString *str=aryTestBingo[(i*_m_iLength+i)];
-                iBackSlash += [str intValue];
-                if (_m_iLength==iBackSlash) {
-                    _m_iBingoCount++;
-                }
-
-            }
-        }
-    }
-    //檢查斜線
-    for (int i=0; i<_m_iLength; i++) {
-        for (int j=0;j<_m_iLength; j++) {
-            if ((i+1)*(_m_iLength-1)==i*_m_iLength+j) {
-                NSString *str=aryTestBingo[(i*_m_iLength+j)];
-                iSlash += [str intValue];
-                if (_m_iLength==iSlash) {
-                    _m_iBingoCount++;
-                }
-                
-            }
-        }
-    }
-    if (_m_iBingoCount==BingoCount) {
-        g_bBingo=YES;
-    }
-    
-    
-    NSLog(@"%d",_m_iBingoCount);
-    
 }
 
 #pragma mark <UICollectionViewDelegateFlowLayout>
@@ -345,11 +367,14 @@ static NSString * const s_reuseIdentifier = @"Cell";
     CGFloat cellWidth=(screenWidth)/_m_iLength;
     return CGSizeMake(cellWidth , cellWidth);
 }
+
 #pragma mark <UITextFieldDelegate>
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
     SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)textField.superview.superview;
+    _m_iTextFeildValue=[cell.m_numberField.text intValue];
     _m_iCellNumber=(int)[self.m_custCollectionView indexPathForCell:cell].row;
     SBingoCollectionViewCell *testCell=nil;
+    //lock other textfield
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
         testCell=g_aryCell[i];
         if (i==_m_iCellNumber) {
@@ -358,37 +383,18 @@ static NSString * const s_reuseIdentifier = @"Cell";
             testCell.m_numberField.enabled=NO;
         }
     }
-    _m_iTextFeildValue=[cell.m_numberField.text intValue];
-    _m_randomButton.enabled=NO;
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    [textField resignFirstResponder];
-    return YES;
-}
-
--(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string{
-    NSString * toBeString = [textField.text stringByReplacingCharactersInRange:range withString:string];
-    SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)textField.superview.superview;
-    _m_iCellNumber=(int)[self.m_custCollectionView indexPathForCell:cell].row;
-    _m_iTextFeildValue=[toBeString intValue];
-    return YES;
 }
 
 -(void)textFieldDidEndEditing:(UITextField *)textField{
     SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)textField.superview.superview;
-    _m_randomButton.enabled=YES;
     _m_iCellNumber=(int)[self.m_custCollectionView indexPathForCell:cell].row;
     _m_iTextFeildValue=[cell.m_numberField.text intValue];
-   
     SBingoCollectionViewCell *testCell=nil;
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
         testCell=g_aryCell[i];
         testCell.m_numberField.enabled=YES;
     }
     [self.m_custCollectionView reloadData];
-    
-
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
@@ -396,21 +402,40 @@ static NSString * const s_reuseIdentifier = @"Cell";
 }
 
 #pragma mark --keyboard method
+//鍵盤將出現
 -(void)keyboardWillShow:(NSNotification*)aNotification
 {
-    NSLog(@"Show");
-    kbSize=[[[aNotification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-}
-
+    kbSize=[[[aNotification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    [self moveCollectionView:kbSize];
+    }
+//鍵盤將消失
 - (void)keyboardWillHide:(NSNotification*)aNotification
 {
-     NSLog(@"Hide");
     kbSize=CGSizeZero;
+    [self moveCollectionView:kbSize];
 }
-
+//鍵盤是否遮住輸入格
 -(void)moveCollectionView:(CGSize)keyboardSize
 {
-    
+    CGRect newframe=oldframe;
+    CGFloat moveDistance=0;
+    CGFloat scrheight=[[UIScreen mainScreen] bounds].size.height;
+    SBingoCollectionViewCell *testCell=g_aryCell[_m_iCellNumber];
+    CGRect cellframe=testCell.frame;
+    if (scrheight-keyboardSize.height-toolbarheight>cellframe.origin.y+cellframe.size.height) {
+        [UIView animateWithDuration:0.1 animations:^{
+            [_m_custCollectionView setFrame:newframe];
+        } completion:^(BOOL finished) {
+        }];
+    }else{
+        //移動
+        moveDistance=(cellframe.origin.y+cellframe.size.height)-(scrheight-keyboardSize.height-toolbarheight);
+        newframe.origin.y=newframe.origin.y-moveDistance;
+        [UIView animateWithDuration:0.5 animations:^{
+            [_m_custCollectionView setFrame:newframe];
+        } completion:^(BOOL finished) {
+        }];
+    }
 }
 
 @end
