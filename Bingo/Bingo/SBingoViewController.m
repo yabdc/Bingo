@@ -73,20 +73,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    //設定colloctionView
-    CGRect newframe=_m_custCollectionView.frame;
-    newframe.size.height=[[UIScreen mainScreen] bounds].size.width;
-    [_m_custCollectionView setFrame:newframe];
     oldframe=_m_custCollectionView.frame;
-    //設定View
-    if (iphone4sHeight==[[UIScreen mainScreen] bounds].size.height) {
-        CGRect newframe=_m_custCollectionView.frame;
-        CGRect newframe2=_m_custView.frame;
-        newframe2.size.height =[[UIScreen mainScreen] bounds].size.width;
-        newframe2.origin.y=newframe.size.height+newframe.origin.y-20;
-        [_m_custView setFrame:newframe2];
-    }
-    
 }
 
 - (void)didReceiveMemoryWarning {
