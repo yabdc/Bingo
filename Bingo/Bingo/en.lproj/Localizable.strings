@@ -1,0 +1,16 @@
+/* 
+  Localizable.strings
+  Bingo
+
+  Created by 1500244 on 2015/5/28.
+  Copyright (c) 2015年 andychan. All rights reserved.
+*/
+    "Waining"="Waining!";
+    "SameNumber"="Can't enter the same number.";
+    "OK"="OK";
+    "OverRange"="Please enter the number between 1 to 30.";
+    "Congratulation"="Congratulation!You Win the game.";
+    "Bingo"="Bingo!";
+    "AllNumber"="Please enter numbers to each grid.";
+    "BingoLine"="BingoLineNow:";
+    "Range"="Range:1~";

@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  Bingo
+
+  Created by 1500244 on 2015/5/28.
+  Copyright (c) 2015年 andychan. All rights reserved.
+*/
+    "CFBundleDisplayName" = "Bingo";
+    "CFBundleName" = "Bingo";
