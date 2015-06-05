@@ -67,11 +67,5 @@
     NSLog(@"完全結束，已進入後臺就不作用，但直接連動有反應（雙擊home鍵拉除）");
     state=[[UIApplication sharedApplication] applicationState];
 }
-//-----------------------------------------------//
--(BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-    state=[[UIApplication sharedApplication] applicationState];
-    return YES;
-}
-
 
 @end

@@ -6,21 +6,26 @@
 //  Copyright (c) 2015年 andychan. All rights reserved.
 //
 
-#define BingoCount    3         //賓果要達成的線條數
-#define toolbarheight 44.0f     //toolbar的高
-#define MaxValue      50        //可輸入的最大數值
-#define BingoLength   3         //賓果的邊長
-#define NOtSelectCell @"0"      //尚未選取
+#define BingoCount          3         //賓果要達成的線條數
+#define Toolbarheight       44.0f     //toolbar的高
+#define MaxValue            50        //可輸入的最大數值
+#define BingoLength         3         //賓果的邊長
+#define CellNotSelect       0
+#define CellSelected        1
+#define KeyBoardMoveTime    0.25
+#define BingoNotSelect      @"0"      //尚未選取
+#define BingoSelected       @"1"
+#define CellName            @"Cell"
+#define NoNumber            @""
 
-
-
-
-
-#define lightGreenColor [UIColor colorWithRed:0.625 green:0.823 blue:0.539 alpha:1.000]
 
 #import "SBingoViewController.h"
 #import "SBingoCollectionViewCell.h"
 #import "SRandom.h"
+#import "SKeyBoardToolBar.h"
+
+#import "UIColor+Extra.h"
+
 @interface SBingoViewController ()<UITextFieldDelegate,UICollectionViewDelegateFlowLayout>
 @property (weak, nonatomic) IBOutlet UICollectionView *m_custCollectionView;
 @property (weak, nonatomic) IBOutlet UIView *m_custView;
@@ -29,12 +34,14 @@
 @property (weak, nonatomic) IBOutlet UISwitch *m_modeSwitch;
 @property (weak, nonatomic) IBOutlet UILabel *m_promptLabel;
 
+
 @property (assign) int m_iLength;           //邊長
 @property (assign) int m_iMaxRange;         //最大值
 @end
 
 @implementation SBingoViewController
 {
+    SKeyBoardToolBar *m_KeyBoardToolBar;
     SRandom *m_Random;          //亂數物件
     NSMutableArray *m_aryShow;  //數字陣列
     NSMutableArray *m_aryBingo; //賓果陣列
@@ -48,8 +55,6 @@
     int m_iCellNumber;          //現在所選的cell
 }
 
-static NSString * const s_reuseIdentifier = @"Cell";
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"viewDidLoad");
@@ -62,8 +67,8 @@ static NSString * const s_reuseIdentifier = @"Cell";
                                           selector:@selector(keyboardWillHide:)
                                           name:UIKeyboardWillHideNotification
                                           object:nil];
-    //數據初始化
     
+    //數據初始化
     self.m_iMaxRange=MaxValue;
     self.m_iLength=BingoLength;
     m_iTextFeildValue=0;
@@ -76,9 +81,9 @@ static NSString * const s_reuseIdentifier = @"Cell";
     m_aryCell=[NSMutableArray new];
     m_kbSize=CGSizeZero;
     m_oldFrameOfColloctionView=CGRectZero;
+    m_KeyBoardToolBar=[[SKeyBoardToolBar alloc] initWithWidth:[[UIScreen mainScreen] bounds].size.width];
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
-        m_aryBingo[i]=NOtSelectCell;
-        m_aryCell[i]=@"0";
+        m_aryBingo[i]=BingoNotSelect;
     }
     m_Random=[[SRandom alloc] initWithRange:_m_iMaxRange];
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
@@ -137,7 +142,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
 
 - (IBAction)enterNumber:(id)sender {
     for (int i=0; i<m_aryShow.count; i++) {
-        m_aryShow[i]=@"";
+        m_aryShow[i]=NoNumber;
     }
     [self.m_custCollectionView reloadData];
 }
@@ -145,7 +150,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
 - (IBAction)changeMode:(id)sender {
     //檢查每格是否有數字
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
-        if (YES==![m_aryShow[i] isEqualToString:@""]) {
+        if (YES==![m_aryShow[i] isEqualToString:NoNumber]) {
             //不相同就什麼都不做
         }else{
             [self showAlertView:NSLocalizedString(@"Waining", nil) message:NSLocalizedString(@"AllNumber", nil)];
@@ -158,7 +163,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
     
     if (YES==m_bMode) {
         for (int i=0; i<_m_iLength*_m_iLength; i++) {
-            m_aryBingo[i]=@"0";
+            m_aryBingo[i]=BingoNotSelect;
         }
         self.m_customButton.enabled=NO;
         self.m_randomButton.enabled=NO;
@@ -216,23 +221,10 @@ static NSString * const s_reuseIdentifier = @"Cell";
 }
 
 - (void)addDoneButton:(UITextField *)TextField{
-    UIToolbar* keyboardToolbar = [[UIToolbar alloc] init]; //宣告上面
-    
-    [keyboardToolbar sizeToFit];
-    UIBarButtonItem *cancelBarButton = [[UIBarButtonItem alloc]
-                                      initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
-                                      target:self.view action:@selector(endEditing:)];
-    UIBarButtonItem *flexBarButton = [[UIBarButtonItem alloc]
-                                      initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
-                                      target:nil action:nil];
-    UIBarButtonItem *doneBarButton = [[UIBarButtonItem alloc]
-                                      initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                      target:self action:@selector(endEditTextField)];
-    keyboardToolbar.items = @[cancelBarButton,flexBarButton, doneBarButton];
-    TextField.inputAccessoryView = keyboardToolbar;
+    TextField.inputAccessoryView = m_KeyBoardToolBar;
 }
 
--(void)endEditTextField{    //命名問題
+-(void)touchDoneBarButton{
     SBingoCollectionViewCell *testCell=m_aryCell[m_iCellNumber];
     if (YES==[self checkSameNumber:[testCell.g_numberField.text intValue]]) {
         if (YES==!([m_aryShow[m_iCellNumber]isKindOfClass:[NSNull class]])) {
@@ -346,7 +338,7 @@ static NSString * const s_reuseIdentifier = @"Cell";
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    SBingoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:s_reuseIdentifier forIndexPath:indexPath];
+    SBingoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CellName forIndexPath:indexPath];
         
     UIColor *borderColor = [UIColor whiteColor];
     [cell.g_imageView.layer setBorderColor:borderColor.CGColor];
@@ -354,15 +346,9 @@ static NSString * const s_reuseIdentifier = @"Cell";
     cell.g_imageView.layer.cornerRadius = cell.g_imageView.frame.size.width / 2;
 //    cell.g_imageView.clipsToBounds = YES;   //不能超過subView
     
-    
     //加結束鍵
     [self addDoneButton:cell.g_numberField];
-    //判斷是否沒資料
-    if (0==m_aryShow.count) {
-        cell.g_numberField.text=@"";
-    }else{
-        cell.g_numberField.text =m_aryShow[indexPath.row];
-    }
+    cell.g_numberField.text =m_aryShow[indexPath.row];
     //是否為遊戲模式
      if (YES==m_bMode) {
         cell.g_numberField.enabled=NO;
@@ -374,9 +360,13 @@ static NSString * const s_reuseIdentifier = @"Cell";
     
     cell.g_numberField.delegate=self;
     // Configure the cell
-    
-    [m_aryCell removeObjectAtIndex:indexPath.row];
-    [m_aryCell insertObject:cell atIndex:indexPath.row];
+    if(((int)m_aryCell.count)-1<(int)indexPath.row){
+        [m_aryCell insertObject:cell atIndex:indexPath.row];
+    }else{
+        [m_aryCell removeObjectAtIndex:indexPath.row];
+        [m_aryCell insertObject:cell atIndex:indexPath.row];
+    }
+
     return cell;
 }
 
@@ -390,14 +380,14 @@ static NSString * const s_reuseIdentifier = @"Cell";
             [m_aryBingo removeObjectAtIndex:indexPath.row];
             SBingoCollectionViewCell *cell = (SBingoCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
             //flag=1,selected.   flag=0,false
-            if (1==cell.g_iFlag) {
-                [m_aryBingo insertObject:@"0" atIndex:indexPath.row];
-                cell.g_iFlag=0;
+            if (CellSelected==cell.g_iFlag) {
+                [m_aryBingo insertObject:BingoNotSelect atIndex:indexPath.row];
+                cell.g_iFlag=CellNotSelect;
                 cell.g_imageView.backgroundColor = [UIColor whiteColor];
             }else{
-                [m_aryBingo insertObject:@"1" atIndex:indexPath.row];
-                cell.g_iFlag=1;
-                cell.g_imageView.backgroundColor = lightGreenColor;
+                [m_aryBingo insertObject:BingoSelected atIndex:indexPath.row];
+                cell.g_iFlag=CellSelected;
+                cell.g_imageView.backgroundColor = [UIColor lightGreenColor];
             }
             [self checkBingo:m_aryBingo];
         }
@@ -450,6 +440,14 @@ static NSString * const s_reuseIdentifier = @"Cell";
 //鍵盤將出現
 -(void)keyboardWillShow:(NSNotification*)aNotification
 {
+    [[NSNotificationCenter defaultCenter] addObserver:self.view
+                                             selector:@selector(endEditing:)
+                                                 name:@"endEditing"
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(touchDoneBarButton)
+                                                 name:@"touchDoneBarButton"
+                                               object:nil];
     m_kbSize=[[[aNotification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     [self moveCollectionView:m_kbSize];
     }
@@ -458,6 +456,12 @@ static NSString * const s_reuseIdentifier = @"Cell";
 {
     m_kbSize=CGSizeZero;
     [self moveCollectionView:m_kbSize];
+    [[NSNotificationCenter defaultCenter]removeObserver:self.view
+                                                   name:@"endEditing"
+                                                 object:nil];
+    [[NSNotificationCenter defaultCenter]removeObserver:self
+                                                   name:@"touchDoneBarButton"
+                                                 object:nil];
 }
 //鍵盤是否遮住輸入格
 -(void)moveCollectionView:(CGSize)keyboardSize
@@ -467,16 +471,16 @@ static NSString * const s_reuseIdentifier = @"Cell";
     CGFloat scrheight=[[UIScreen mainScreen] bounds].size.height;
     SBingoCollectionViewCell *testCell=m_aryCell[m_iCellNumber];
     CGRect cellframe=testCell.frame;
-    if (scrheight-keyboardSize.height-toolbarheight>cellframe.origin.y+cellframe.size.height) {
-        [UIView animateWithDuration:0.25 animations:^{
+    if (scrheight-keyboardSize.height-Toolbarheight>cellframe.origin.y+cellframe.size.height) {
+        [UIView animateWithDuration:KeyBoardMoveTime animations:^{
             [self.m_custCollectionView setFrame:newframe];
         } completion:^(BOOL finished) {
         }];
     }else{
         //移動
-        moveDistance=(cellframe.origin.y+cellframe.size.height)-(scrheight-keyboardSize.height-toolbarheight);
+        moveDistance=(cellframe.origin.y+cellframe.size.height)-(scrheight-keyboardSize.height-Toolbarheight);
         newframe.origin.y=newframe.origin.y-moveDistance;
-        [UIView animateWithDuration:0.25 animations:^{
+        [UIView animateWithDuration:KeyBoardMoveTime animations:^{
             [self.m_custCollectionView setFrame:newframe];
         } completion:^(BOOL finished) {
         }];
