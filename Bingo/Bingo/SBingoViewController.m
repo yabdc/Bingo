@@ -10,19 +10,19 @@
 #define Toolbarheight       44.0f     //toolbar的高
 #define MaxValue            50        //可輸入的最大數值
 #define BingoLength         3         //賓果的邊長
-#define CellNotSelect       0
-#define CellSelected        1
-#define KeyBoardMoveTime    0.25
-#define BingoNotSelect      @"0"      //尚未選取
-#define BingoSelected       @"1"
-#define CellName            @"Cell"
-#define NoNumber            @""
+#define CellNotSelect       0         //cell未選取
+#define CellSelected        1         //cell被選取
+#define KeyBoardMoveTime    0.25      //鍵盤移動時間
+#define BingoNotSelect      @"0"      //尚未選取（陣列用的）
+#define BingoSelected       @"1"      //已選取（陣列用的）
+#define CellName            @"Cell"   //cell名稱
+#define NoNumber            @""       //格子中沒數字
 
 
 #import "SBingoViewController.h"
+
 #import "SBingoCollectionViewCell.h"
-#import "SRandom.h"
-#import "SKeyBoardToolBar.h"
+#import "SBingo.h"
 
 #import "UIColor+Extra.h"
 
@@ -41,18 +41,19 @@
 
 @implementation SBingoViewController
 {
-    SKeyBoardToolBar *m_KeyBoardToolBar;
-    SRandom *m_Random;          //亂數物件
-    NSMutableArray *m_aryShow;  //數字陣列
-    NSMutableArray *m_aryBingo; //賓果陣列
-    NSMutableArray *m_aryCell;  //CollectionViewCell陣列
-    BOOL m_bMode;               //模式
-    BOOL m_bBingo;              //賓果
-    CGSize m_kbSize;            //鍵盤size
-    CGRect m_oldFrameOfColloctionView;    //暫存CollectionView移動前的位置
-    int m_iTextFeildValue;      //檢查文字暫存值
-    int m_iBingoCount;          //現在賓果的線條數
-    int m_iCellNumber;          //現在所選的cell
+    SKeyBoardToolBar *m_KeyBoardToolBar;    //鍵盤toolbar
+    SCheckBingo *m_CheckBingo;              //檢查賓果物件
+    SRandom *m_Random;                      //亂數物件
+    NSMutableArray *m_aryShow;              //數字陣列
+    NSMutableArray *m_aryBingo;             //賓果陣列
+    NSMutableArray *m_aryCell;              //CollectionViewCell陣列
+    BOOL m_bMode;                           //模式
+    BOOL m_bBingo;                          //賓果
+    CGSize m_kbSize;                        //鍵盤size
+    CGRect m_oldFrameOfColloctionView;      //暫存CollectionView移動前的位置
+    int m_iTextFeildValue;                  //檢查文字暫存值
+    int m_iBingoCount;                      //現在賓果的線條數
+    int m_iCellNumber;                      //現在所選的cell
 }
 
 - (void)viewDidLoad {
@@ -86,6 +87,7 @@
         m_aryBingo[i]=BingoNotSelect;
     }
     m_Random=[[SRandom alloc] initWithRange:_m_iMaxRange];
+    m_CheckBingo=[[SCheckBingo alloc] init];
     for (int i=0; i<_m_iLength*_m_iLength; i++) {
         [m_aryShow insertObject:m_Random.g_aryRandom[i] atIndex:i];
     }
@@ -220,39 +222,13 @@
     [alert show];
 }
 
-- (void)addDoneButton:(UITextField *)TextField{
-    TextField.inputAccessoryView = m_KeyBoardToolBar;
-}
 
--(void)touchDoneBarButton{
-    SBingoCollectionViewCell *testCell=m_aryCell[m_iCellNumber];
-    if (YES==[self checkSameNumber:[testCell.g_numberField.text intValue]]) {
-        if (YES==!([m_aryShow[m_iCellNumber]isKindOfClass:[NSNull class]])) {
-            [m_aryShow removeObjectAtIndex:m_iCellNumber];
-            [m_aryShow insertObject:testCell.g_numberField.text
-                       atIndex:m_iCellNumber];
-        }else{
-            [m_aryShow insertObject:testCell.g_numberField.text
-                       atIndex:m_iCellNumber];
-        }
-        [self.m_custCollectionView reloadData];
-        [testCell.g_numberField resignFirstResponder];
-        [self.view endEditing:YES];
-    }
-}
 #pragma mark -- BingoMethods
 
 -(void)checkBingo:(NSMutableArray *)aryTestBingo
 {
-    m_iBingoCount=0;
-    //檢查橫列
-    [self checkBingoRow:aryTestBingo];
-    //檢查直行
-    [self checkBingoStraight:aryTestBingo];
-    //檢查反斜線
-    [self checkBingoBackSlash:aryTestBingo];
-    //檢查斜線
-    [self checkBingoSlash:aryTestBingo];
+    m_iBingoCount=[m_CheckBingo checkBingo:[aryTestBingo copy] iLength:_m_iLength];
+    
     self.m_promptLabel.text=[NSString stringWithFormat:@"%@ %d",NSLocalizedString(@"BingoLine", nil),m_iBingoCount];
     if (m_iBingoCount>=BingoCount) {
         m_bBingo=YES;
@@ -260,69 +236,6 @@
               message:NSLocalizedString(@"Congratulation", nil)];
         _m_promptLabel.text=[NSString stringWithFormat:@"%@"
                              ,NSLocalizedString(@"Bingo", nil)];
-    }
-}
-
--(void)checkBingoRow:(NSMutableArray *)aryTestBingo{
-    int iRowCount=0;
-    NSString *str=nil;
-    for (int i=0; i<_m_iLength; i++) {
-        iRowCount=0;
-        for (int j=0;j<_m_iLength; j++) {
-            str=aryTestBingo[i*_m_iLength+j];
-            iRowCount += [str intValue];
-            if (_m_iLength==iRowCount) {
-                m_iBingoCount++;
-            }
-        }
-    }
-}
-
--(void)checkBingoStraight:(NSMutableArray *)aryTestBingo{
-    int iStraightCount=0;
-    NSString *str=nil;
-    for (int i=0; i<_m_iLength; i++) {
-        iStraightCount=0;
-        for (int j=0;j<_m_iLength; j++) {
-            str=aryTestBingo[i+j*_m_iLength];
-            iStraightCount += [str intValue];
-            if (_m_iLength==iStraightCount) {
-                m_iBingoCount++;
-            }
-        }
-    }
-}
-
--(void)checkBingoBackSlash:(NSMutableArray *)aryTestBingo{
-    int iBackSlash=0;
-    NSString *str=nil;
-    for (int i=0; i<_m_iLength; i++) {
-        for (int j=0;j<_m_iLength; j++) {
-            if (i==j) {
-                str=aryTestBingo[(i*_m_iLength+i)];
-                iBackSlash += [str intValue];
-                if (_m_iLength==iBackSlash) {
-                    m_iBingoCount++;
-                }
-                
-            }
-        }
-    }
-}
-
--(void)checkBingoSlash:(NSMutableArray *)aryTestBingo{
-    int iSlash=0;
-    NSString *str=nil;
-    for (int i=0; i<_m_iLength; i++) {
-        for (int j=0;j<_m_iLength; j++) {
-            if ((i+1)*(_m_iLength-1)==i*_m_iLength+j) {
-                str=aryTestBingo[(i*_m_iLength+j)];
-                iSlash += [str intValue];
-                if (_m_iLength==iSlash) {
-                    m_iBingoCount++;
-                }
-            }
-        }
     }
 }
 
@@ -339,15 +252,14 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     SBingoCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CellName forIndexPath:indexPath];
-        
     UIColor *borderColor = [UIColor whiteColor];
     [cell.g_imageView.layer setBorderColor:borderColor.CGColor];
     [cell.g_imageView.layer setBorderWidth:1.0];
     cell.g_imageView.layer.cornerRadius = cell.g_imageView.frame.size.width / 2;
-//    cell.g_imageView.clipsToBounds = YES;   //不能超過subView
-    
+    //    cell.g_imageView.clipsToBounds = YES;   //不能超過subView
     //加結束鍵
-    [self addDoneButton:cell.g_numberField];
+    cell.g_numberField.inputAccessoryView=m_KeyBoardToolBar;
+    
     cell.g_numberField.text =m_aryShow[indexPath.row];
     //是否為遊戲模式
      if (YES==m_bMode) {
@@ -437,6 +349,22 @@
 }
 
 #pragma mark --keyboard method
+-(void)touchDoneBarButton{
+    SBingoCollectionViewCell *testCell=m_aryCell[m_iCellNumber];
+    if (YES==[self checkSameNumber:[testCell.g_numberField.text intValue]]) {
+        if (YES==!([m_aryShow[m_iCellNumber]isKindOfClass:[NSNull class]])) {
+            [m_aryShow removeObjectAtIndex:m_iCellNumber];
+            [m_aryShow insertObject:testCell.g_numberField.text
+                            atIndex:m_iCellNumber];
+        }else{
+            [m_aryShow insertObject:testCell.g_numberField.text
+                            atIndex:m_iCellNumber];
+        }
+        [self.m_custCollectionView reloadData];
+        [testCell.g_numberField resignFirstResponder];
+        [self.view endEditing:YES];
+    }
+}
 //鍵盤將出現
 -(void)keyboardWillShow:(NSNotification*)aNotification
 {

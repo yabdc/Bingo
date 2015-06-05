@@ -10,6 +10,7 @@
 		E7063EA31B20002500CEFC73 /* UIColor+Extra.m in Sources */ = {isa = PBXBuildFile; fileRef = E7063EA21B20002500CEFC73 /* UIColor+Extra.m */; };
 		E7063EB21B2033CF00CEFC73 /* SKeyBoardToolBar.m in Sources */ = {isa = PBXBuildFile; fileRef = E7063EB11B2033CF00CEFC73 /* SKeyBoardToolBar.m */; };
 		E7063EB41B2033EB00CEFC73 /* SKeyBoardToolBar.xib in Resources */ = {isa = PBXBuildFile; fileRef = E7063EB31B2033EB00CEFC73 /* SKeyBoardToolBar.xib */; };
+		E7063EB81B2135E500CEFC73 /* SCheckBingo.m in Sources */ = {isa = PBXBuildFile; fileRef = E7063EB71B2135E500CEFC73 /* SCheckBingo.m */; };
 		E711F84F1B1318BD0020FA87 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E711F84E1B1318BD0020FA87 /* main.m */; };
 		E711F8521B1318BD0020FA87 /* BingoDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E711F8511B1318BD0020FA87 /* BingoDelegate.m */; };
 		E711F8551B1318BD0020FA87 /* SBingoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E711F8541B1318BD0020FA87 /* SBingoViewController.m */; };
@@ -41,6 +42,9 @@
 		E7063EB01B2033CF00CEFC73 /* SKeyBoardToolBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SKeyBoardToolBar.h; path = ../SKeyBoardToolBar.h; sourceTree = "<group>"; };
 		E7063EB11B2033CF00CEFC73 /* SKeyBoardToolBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SKeyBoardToolBar.m; path = ../SKeyBoardToolBar.m; sourceTree = "<group>"; };
 		E7063EB31B2033EB00CEFC73 /* SKeyBoardToolBar.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SKeyBoardToolBar.xib; sourceTree = "<group>"; };
+		E7063EB61B2135E500CEFC73 /* SCheckBingo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCheckBingo.h; sourceTree = "<group>"; };
+		E7063EB71B2135E500CEFC73 /* SCheckBingo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCheckBingo.m; sourceTree = "<group>"; };
+		E7063EB91B21421C00CEFC73 /* SBingo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SBingo.h; sourceTree = "<group>"; };
 		E711F8491B1318BD0020FA87 /* Bingo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bingo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E711F84E1B1318BD0020FA87 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E711F8501B1318BD0020FA87 /* BingoDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BingoDelegate.h; sourceTree = "<group>"; };
@@ -98,6 +102,21 @@
 			name = Categories;
 			sourceTree = "<group>";
 		};
+		E7063EBA1B21442B00CEFC73 /* Class */ = {
+			isa = PBXGroup;
+			children = (
+				E7063EB91B21421C00CEFC73 /* SBingo.h */,
+				E7063EB61B2135E500CEFC73 /* SCheckBingo.h */,
+				E7063EB71B2135E500CEFC73 /* SCheckBingo.m */,
+				E711F8751B1327B50020FA87 /* SRandom.h */,
+				E711F8761B1327B50020FA87 /* SRandom.m */,
+				E7063EB01B2033CF00CEFC73 /* SKeyBoardToolBar.h */,
+				E7063EB11B2033CF00CEFC73 /* SKeyBoardToolBar.m */,
+				E7063EB31B2033EB00CEFC73 /* SKeyBoardToolBar.xib */,
+			);
+			name = Class;
+			sourceTree = "<group>";
+		};
 		E711F8401B1318BD0020FA87 = {
 			isa = PBXGroup;
 			children = (
@@ -119,6 +138,7 @@
 		E711F84B1B1318BD0020FA87 /* Bingo */ = {
 			isa = PBXGroup;
 			children = (
+				E7063EBA1B21442B00CEFC73 /* Class */,
 				E7063EA41B2013B200CEFC73 /* Categories */,
 				E711F8501B1318BD0020FA87 /* BingoDelegate.h */,
 				E711F8511B1318BD0020FA87 /* BingoDelegate.m */,
@@ -126,13 +146,8 @@
 				E711F8541B1318BD0020FA87 /* SBingoViewController.m */,
 				E711F8721B13193E0020FA87 /* SBingoCollectionViewCell.h */,
 				E711F8731B13193E0020FA87 /* SBingoCollectionViewCell.m */,
-				E711F8751B1327B50020FA87 /* SRandom.h */,
-				E711F8761B1327B50020FA87 /* SRandom.m */,
-				E7063EB01B2033CF00CEFC73 /* SKeyBoardToolBar.h */,
-				E7063EB11B2033CF00CEFC73 /* SKeyBoardToolBar.m */,
-				E7063EB31B2033EB00CEFC73 /* SKeyBoardToolBar.xib */,
-				E711F8561B1318BD0020FA87 /* Main.storyboard */,
 				E7380FDF1B16EF5D00045C2D /* Localizable.strings */,
+				E711F8561B1318BD0020FA87 /* Main.storyboard */,
 				E711F8591B1318BD0020FA87 /* Images.xcassets */,
 				E711F85B1B1318BD0020FA87 /* LaunchScreen.xib */,
 				E711F84C1B1318BD0020FA87 /* Supporting Files */,
@@ -272,6 +287,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E7063EB81B2135E500CEFC73 /* SCheckBingo.m in Sources */,
 				E711F8771B1327B50020FA87 /* SRandom.m in Sources */,
 				E711F8551B1318BD0020FA87 /* SBingoViewController.m in Sources */,
 				E711F8521B1318BD0020FA87 /* BingoDelegate.m in Sources */,
